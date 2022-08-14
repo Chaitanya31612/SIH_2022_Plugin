@@ -1,0 +1,44 @@
+{
+  "name": "SIH - Sanskrit Voice to Text",
+  "description": "Universal Plugin to convert Sanskrit Voice to text on any website on the go",
+  "version": "1.0",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": {
+      "16": "assets/appicon16_light.png",
+      "32": "assets/appicon32_light.png",
+      "48": "assets/appicon48_light.png",
+      "19": "assets/appicon19_light.png",
+      "38": "assets/appicon38_light.png"
+    },
+    "default_title": "Sanskrit Voice to Text",
+    "default_popup": "popup.html"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/bookmark.png",
+        "assets/play.png",
+        "assets/delete.png",
+        "assets/save.png"
+      ],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ],
+  "icons": {
+    "16": "assets/appicon16_light.png",
+    "32": "assets/appicon32_light.png",
+    "48": "assets/appicon48_light.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "permissions": ["storage", "activeTab", "tabs"],
+  "options_page": "options.html"
+}
