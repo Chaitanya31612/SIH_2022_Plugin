@@ -20,10 +20,12 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "assets/bookmark.png",
-        "assets/play.png",
-        "assets/delete.png",
-        "assets/save.png"
+        "assets/microphone_off.png",
+        "assets/microphone_on.png",
+        "assets/microphone24_off.png",
+        "assets/microphone24_on.png",
+        "assets/microphone32_off.png",
+        "assets/microphone32_on.png"
       ],
       "matches": ["http://*/*", "https://*/*"]
     }
