@@ -1,0 +1,128 @@
+<style>
+    html, body {
+        margin: 0!important;
+        padding: 0!important;
+    }
+</style>
+
+<title>Auto Stop RecordRTC on Silence</title>
+<h1>Auto Stop RecordRTC on Silence</h1>
+
+<br>
+<button id="btn-start-recording">Start Recording</button>
+<button id="btn-stop-recording" disabled style="display: none;">Stop Recording</button>
+
+<hr>
+<audio controls muted playsinline></audio>
+
+<script src="https://www.WebRTC-Experiment.com/RecordRTC.js"></script>
+<script src="https://www.webrtc-experiment.com/hark.js"></script>
+<script>
+var audio = document.querySelector('audio');
+var h1 = document.querySelector('h1');
+var default_h1 = h1.innerHTML;
+
+function captureMicrophone(callback) {
+    navigator.mediaDevices.getUserMedia({audio: true}).then(callback).catch(function(error) {
+        alert('Unable to access your microphone.');
+        console.error(error);
+    });
+}
+
+function stopRecordingCallback() {
+    audio.srcObject = null;
+    var blob = recorder.getBlob();
+    console.log(blob)
+
+    var reader = new FileReader();
+    reader.readAsDataURL(blob)
+
+    reader.onloadend = function () {
+            var base64String = reader.result;
+        console.log('Base64 String - ', base64String);
+    
+        // Simply Print the Base64 Encoded String,
+        // without additional data: Attributes.
+        var base64substr = base64String.substr(base64String.indexOf(', ') + 1)
+        console.log('Base64 String without Tags- ', );
+        console.log(base64String === base64String)
+    }
+    audio.src = URL.createObjectURL(blob);
+
+    recorder.microphone.stop();
+    audio.muted = true;
+}
+
+var recorder; // globally accessible
+
+document.getElementById('btn-start-recording').onclick = function() {
+    this.disabled = true;
+    captureMicrophone(function(microphone) {
+        audio.srcObject = microphone;
+
+        recorder = RecordRTC(microphone, {
+            type: 'audio',
+            recorderType: StereoAudioRecorder,
+            desiredSampRate: 16000
+        });
+
+        recorder.startRecording();
+
+        var max_seconds = 2;
+        var stopped_speaking_timeout;
+        var speechEvents = hark(microphone, {});
+
+        speechEvents.on('speaking', function() {
+            console.log(recorder.getBlob());
+            if(recorder.getBlob()) return;
+
+            clearTimeout(stopped_speaking_timeout);
+
+            if(recorder.getState() === 'paused') {
+                // recorder.resumeRecording();
+            }
+            
+            h1.innerHTML = default_h1;
+        });
+
+        speechEvents.on('stopped_speaking', function() {
+            console.log(recorder.getBlob());
+            if(recorder.getBlob()) return;
+
+            // recorder.pauseRecording();
+            stopped_speaking_timeout = setTimeout(function() {
+                document.getElementById('btn-stop-recording').click();
+                h1.innerHTML = 'Recording is now stopped.';
+            }, max_seconds * 1000);
+
+            
+            // just for logging purpose (you ca remove below code)
+            var seconds = max_seconds;
+            (function looper() {
+                h1.innerHTML = 'Recording is going to be stopped in ' + seconds + ' seconds.';
+                seconds--;
+
+                if(seconds <= 0) {
+                    h1.innerHTML = default_h1;
+                    return;
+                }
+
+                setTimeout(looper, 1000);
+            })();
+        });
+
+        // release camera on stopRecording
+        recorder.microphone = microphone;
+
+        document.getElementById('btn-stop-recording').disabled = false;
+    });
+};
+
+document.getElementById('btn-stop-recording').onclick = function() {
+    this.disabled = true;
+    recorder.stopRecording(stopRecordingCallback);
+};
+</script>
+
+<footer style="margin-top: 20px;"><small id="send-message"></small></footer>
+<script src="https://www.webrtc-experiment.com/common.js"></script>
