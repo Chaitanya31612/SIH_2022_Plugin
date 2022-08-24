@@ -38,14 +38,30 @@ function stopRecordingCallback() {
     reader.readAsDataURL(blob)
 
     reader.onloadend = function () {
-            var base64String = reader.result;
+        var base64String = reader.result;
         console.log('Base64 String - ', base64String);
-    
-        // Simply Print the Base64 Encoded String,
-        // without additional data: Attributes.
-        var base64substr = base64String.substr(base64String.indexOf(', ') + 1)
-        console.log('Base64 String without Tags- ', );
-        console.log(base64String === base64String)
+
+        var obj = {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+            }, 
+            body: JSON.stringify({
+                filedata: base64String
+            })
+        }
+
+        fetch('http://localhost:8000/predict-base64/', obj)
+        .then((res) => {
+            return res.json();
+        })
+        .then(json => {
+            console.log(json)
+        })
+        .catch(err => {
+            console.error(err);
+        })
     }
     audio.src = URL.createObjectURL(blob);
 
